@@ -107,6 +107,21 @@ Optional SQLite mode
 Run tests
 - py -3.13 -m pytest -q
 
+## Quick Demo (2 Minutes)
+1. Start the API:
+	- py -3.13 -m uvicorn main:app --reload
+2. Open Swagger docs:
+	- http://127.0.0.1:8000/docs
+3. Create one order using POST /orders.
+4. Update status using PATCH /orders/{order_id}/status in sequence:
+	- RECEIVED -> PROCESSING -> READY -> DELIVERED
+5. Verify results using:
+	- GET /orders
+	- GET /dashboard
+	- GET /orders/{order_id}/history
+6. Open the simple frontend:
+	- http://127.0.0.1:8000/ui
+
 ## 5) API Endpoints List
 Base URL
 - http://127.0.0.1:8000
@@ -203,3 +218,19 @@ Sample HTTP requests are available in sample_requests.http.
 - Add CI workflow for automated tests and lint checks.
 - Add richer analytics (daily revenue, peak order times, garment trends).
 - Serve frontend directly from FastAPI static files.
+
+## Screenshots
+
+### Frontend
+![Frontend Overview](screenshots/01-frontend-overview.png)
+
+![Frontend Filtered Orders](screenshots/05-frontend-filtered-orders.png)
+
+![Frontend Order Cards](screenshots/06-frontend-order-cards.png)
+
+### Swagger API Docs
+![Swagger Overview](screenshots/02-swagger-overview.png)
+
+![Swagger Create Order](screenshots/03-swagger-create-order.png)
+
+![Swagger List Orders Params](screenshots/04-swagger-list-orders-params.png)
