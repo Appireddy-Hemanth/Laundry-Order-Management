@@ -1,0 +1,59 @@
+### Health check
+GET http://127.0.0.1:8000/
+
+### Create an order
+POST http://127.0.0.1:8000/orders
+Content-Type: application/json
+
+{
+  "customer_name": "Ravi Kumar",
+  "phone_number": "+91 9876543210",
+  "garments": [
+    { "type": "shirt", "quantity": 3 },
+    { "type": "pants", "quantity": 2 }
+  ]
+}
+
+### Update order status (replace ORDER_ID)
+PATCH http://127.0.0.1:8000/orders/ORDER_ID/status
+Content-Type: application/json
+
+{
+  "status": "PROCESSING"
+}
+
+### Get all orders
+GET http://127.0.0.1:8000/orders
+
+### Get filtered orders by status
+GET http://127.0.0.1:8000/orders?status=READY
+
+### Get filtered orders by customer name
+GET http://127.0.0.1:8000/orders?customer_name=ravi
+
+### Get filtered orders by phone number
+GET http://127.0.0.1:8000/orders?phone_number=9876
+
+### Get filtered orders by garment type
+GET http://127.0.0.1:8000/orders?garment_type=shirt
+
+### Get paginated orders
+GET http://127.0.0.1:8000/orders?skip=0&limit=2
+
+### Get one order by id (replace ORDER_ID)
+GET http://127.0.0.1:8000/orders/ORDER_ID
+
+### Delete one order by id (replace ORDER_ID)
+DELETE http://127.0.0.1:8000/orders/ORDER_ID
+
+### Get order status history by id (replace ORDER_ID)
+GET http://127.0.0.1:8000/orders/ORDER_ID/history
+
+### Dashboard
+GET http://127.0.0.1:8000/dashboard
+
+### Delayed orders report
+GET http://127.0.0.1:8000/reports/delayed
+
+### Garment analytics report
+GET http://127.0.0.1:8000/reports/garments

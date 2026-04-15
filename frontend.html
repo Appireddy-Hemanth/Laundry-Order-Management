@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Laundry Order Management</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #1b2638;
+      --muted: #5f6f86;
+      --primary: #1166d8;
+      --primary-hover: #0c4fa8;
+      --success: #198754;
+      --danger: #b02a37;
+      --border: #d8e1ee;
+      --shadow: 0 8px 24px rgba(17, 102, 216, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 100%);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    .header,
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .header h1 { margin: 0 0 8px; }
+    .header p { margin: 0; color: var(--muted); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    @media (min-width: 900px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .field { margin-bottom: 12px; }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    input, select, button {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    @media (min-width: 600px) {
+      .row { grid-template-columns: 1fr 1fr; }
+    }
+
+    .btn {
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn:hover { background: var(--primary-hover); }
+    .btn.secondary { background: #6c7a90; }
+    .btn.success { background: var(--success); }
+    .btn.danger { background: var(--danger); }
+
+    .garment-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr auto;
+      gap: 10px;
+      margin-bottom: 10px;
+      align-items: center;
+    }
+
+    .status {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      white-space: pre-wrap;
+      background: #f8fbff;
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      min-height: 70px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    @media (min-width: 900px) {
+      .toolbar { grid-template-columns: 1fr 1fr auto; }
+    }
+
+    .orders {
+      display: grid;
+      gap: 12px;
+      max-height: 520px;
+      overflow: auto;
+    }
+
+    .order-card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fcfdff;
+    }
+
+    .order-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      background: #e8f1ff;
+      color: #0f4fae;
+    }
+
+    .small { font-size: 0.88rem; color: var(--muted); }
+
+    .order-actions {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .mono {
+      font-family: Consolas, monospace;
+      background: #edf2fb;
+      border-radius: 6px;
+      padding: 2px 6px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="header">
+      <h1>Mini Laundry Order Management</h1>
+      <p>Beginner-friendly UI for your FastAPI backend. API base URL: <span class="mono" id="apiBaseText"></span></p>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Create Order</h2>
+
+        <div class="field">
+          <label for="apiBase">Backend URL</label>
+          <input id="apiBase" type="text" value="http://127.0.0.1:8000">
+        </div>
+
+        <form id="orderForm">
+          <div class="field">
+            <label for="customerName">Customer Name</label>
+            <input id="customerName" type="text" placeholder="e.g. Ravi Kumar" required>
+          </div>
+
+          <div class="field">
+            <label for="phoneNumber">Phone Number</label>
+            <input id="phoneNumber" type="text" placeholder="e.g. +91 9876543210" required>
+          </div>
+
+          <label>Garments</label>
+          <div id="garmentsContainer"></div>
+
+          <div class="row">
+            <button type="button" class="btn secondary" id="addGarmentBtn">Add Garment Row</button>
+            <button type="submit" class="btn success">Create Order</button>
+          </div>
+        </form>
+
+        <div class="status" id="createOrderResult">Create order response will appear here.</div>
+      </article>
+
+      <article class="card">
+        <h2>Orders</h2>
+
+        <div class="toolbar">
+          <input id="filterName" type="text" placeholder="Filter by customer name">
+          <input id="filterPhone" type="text" placeholder="Filter by phone number">
+          <select id="filterStatus">
+            <option value="">All statuses</option>
+            <option value="RECEIVED">RECEIVED</option>
+            <option value="PROCESSING">PROCESSING</option>
+            <option value="READY">READY</option>
+            <option value="DELIVERED">DELIVERED</option>
+          </select>
+        </div>
+
+        <div class="row" style="margin-bottom: 12px;">
+          <button class="btn" id="loadOrdersBtn" type="button">Load Orders</button>
+          <button class="btn secondary" id="clearFiltersBtn" type="button">Clear Filters</button>
+        </div>
+
+        <div class="status" id="ordersResult">Order list response will appear here.</div>
+        <div class="orders" id="ordersList"></div>
+      </article>
+    </section>
+  </div>
+
+  <script>
+    var garmentTypes = ["shirt", "pants", "saree"];
+    var statuses = ["RECEIVED", "PROCESSING", "READY", "DELIVERED"];
+
+    var apiBaseInput = document.getElementById("apiBase");
+    var apiBaseText = document.getElementById("apiBaseText");
+    var garmentsContainer = document.getElementById("garmentsContainer");
+    var orderForm = document.getElementById("orderForm");
+    var createOrderResult = document.getElementById("createOrderResult");
+    var ordersResult = document.getElementById("ordersResult");
+    var ordersList = document.getElementById("ordersList");
+
+    var filterName = document.getElementById("filterName");
+    var filterPhone = document.getElementById("filterPhone");
+    var filterStatus = document.getElementById("filterStatus");
+
+    function getApiBase() {
+      return apiBaseInput.value.trim().replace(/\/$/, "");
+    }
+
+    function updateApiBaseText() {
+      apiBaseText.textContent = getApiBase();
+    }
+
+    function addGarmentRow(defaultType, defaultQuantity) {
+      var typeValue = defaultType || "shirt";
+      var qtyValue = defaultQuantity || 1;
+
+      var wrapper = document.createElement("div");
+      wrapper.className = "garment-row";
+
+      var typeSelect = document.createElement("select");
+      for (var i = 0; i < garmentTypes.length; i++) {
+        var option = document.createElement("option");
+        option.value = garmentTypes[i];
+        option.textContent = garmentTypes[i];
+        if (garmentTypes[i] === typeValue) {
+          option.selected = true;
+        }
+        typeSelect.appendChild(option);
+      }
+
+      var qtyInput = document.createElement("input");
+      qtyInput.type = "number";
+      qtyInput.min = "1";
+      qtyInput.value = String(qtyValue);
+
+      var removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className = "btn danger";
+      removeBtn.textContent = "Remove";
+      removeBtn.onclick = function () {
+        wrapper.remove();
+      };
+
+      wrapper.appendChild(typeSelect);
+      wrapper.appendChild(qtyInput);
+      wrapper.appendChild(removeBtn);
+      garmentsContainer.appendChild(wrapper);
+    }
+
+    function collectGarments() {
+      var rows = garmentsContainer.querySelectorAll(".garment-row");
+      var garments = [];
+      for (var i = 0; i < rows.length; i++) {
+        var type = rows[i].children[0].value;
+        var quantity = Number(rows[i].children[1].value);
+        if (type && quantity > 0) {
+          garments.push({ type: type, quantity: quantity });
+        }
+      }
+      return garments;
+    }
+
+    function safeJsonString(value) {
+      return JSON.stringify(value, null, 2);
+    }
+
+    async function fetchJson(url, options) {
+      var response = await fetch(url, options || {});
+      var data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        data = { message: "No JSON body returned" };
+      }
+
+      if (!response.ok) {
+        var err = new Error("Request failed");
+        err.status = response.status;
+        err.payload = data;
+        throw err;
+      }
+
+      return data;
+    }
+
+    async function createOrder(event) {
+      event.preventDefault();
+      createOrderResult.textContent = "Creating order...";
+
+      var payload = {
+        customer_name: document.getElementById("customerName").value.trim(),
+        phone_number: document.getElementById("phoneNumber").value.trim(),
+        garments: collectGarments()
+      };
+
+      if (!payload.customer_name || !payload.phone_number || payload.garments.length === 0) {
+        createOrderResult.textContent = "Please fill all fields and add at least one garment.";
+        return;
+      }
+
+      try {
+        var data = await fetchJson(getApiBase() + "/orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        createOrderResult.textContent = "Success (201)\n" + safeJsonString(data);
+        orderForm.reset();
+        garmentsContainer.innerHTML = "";
+        addGarmentRow();
+        loadOrders();
+      } catch (error) {
+        createOrderResult.textContent = "Error (" + (error.status || "unknown") + ")\n" + safeJsonString(error.payload || error.message);
+      }
+    }
+
+    async function loadOrders() {
+      ordersResult.textContent = "Loading orders...";
+      ordersList.innerHTML = "";
+
+      var params = new URLSearchParams();
+      if (filterName.value.trim()) {
+        params.set("customer_name", filterName.value.trim());
+      }
+      if (filterPhone.value.trim()) {
+        params.set("phone_number", filterPhone.value.trim());
+      }
+      if (filterStatus.value) {
+        params.set("status", filterStatus.value);
+      }
+
+      var query = params.toString();
+      var url = getApiBase() + "/orders";
+      if (query) {
+        url = url + "?" + query;
+      }
+
+      try {
+        var orders = await fetchJson(url);
+        ordersResult.textContent = "Success (200)\n" + safeJsonString(orders);
+
+        if (!orders.length) {
+          ordersList.innerHTML = "<div class='small'>No orders found.</div>";
+          return;
+        }
+
+        for (var i = 0; i < orders.length; i++) {
+          renderOrderCard(orders[i]);
+        }
+      } catch (error) {
+        ordersResult.textContent = "Error (" + (error.status || "unknown") + ")\n" + safeJsonString(error.payload || error.message);
+      }
+    }
+
+    function renderOrderCard(order) {
+      var card = document.createElement("div");
+      card.className = "order-card";
+
+      var garmentsText = "";
+      for (var i = 0; i < order.garments.length; i++) {
+        var g = order.garments[i];
+        var line = g.type + " x" + g.quantity + " = " + g.line_total;
+        garmentsText = garmentsText ? garmentsText + ", " + line : line;
+      }
+
+      card.innerHTML =
+        "<div class='order-head'>" +
+        "<strong>" + order.customer_name + "</strong>" +
+        "<span class='pill'>" + order.status + "</span>" +
+        "</div>" +
+        "<div class='small'>Order ID: " + order.order_id + "</div>" +
+        "<div class='small'>Phone: " + order.phone_number + "</div>" +
+        "<div class='small'>Garments: " + garmentsText + "</div>" +
+        "<div class='small'>Total Bill: " + order.total_bill + "</div>" +
+        "<div class='small'>Estimated Delivery: " + order.estimated_delivery_date + "</div>";
+
+      var actions = document.createElement("div");
+      actions.className = "order-actions";
+
+      var statusSelect = document.createElement("select");
+      for (var j = 0; j < statuses.length; j++) {
+        var option = document.createElement("option");
+        option.value = statuses[j];
+        option.textContent = statuses[j];
+        if (statuses[j] === order.status) {
+          option.selected = true;
+        }
+        statusSelect.appendChild(option);
+      }
+
+      var updateBtn = document.createElement("button");
+      updateBtn.className = "btn";
+      updateBtn.type = "button";
+      updateBtn.textContent = "Update Status";
+      updateBtn.onclick = function () {
+        updateOrderStatus(order.order_id, statusSelect.value);
+      };
+
+      actions.appendChild(statusSelect);
+      actions.appendChild(updateBtn);
+      card.appendChild(actions);
+
+      ordersList.appendChild(card);
+    }
+
+    async function updateOrderStatus(orderId, status) {
+      ordersResult.textContent = "Updating order " + orderId + " to " + status + "...";
+
+      try {
+        var data = await fetchJson(getApiBase() + "/orders/" + orderId + "/status", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: status })
+        });
+
+        ordersResult.textContent = "Status updated (200)\n" + safeJsonString(data);
+        loadOrders();
+      } catch (error) {
+        ordersResult.textContent = "Error (" + (error.status || "unknown") + ")\n" + safeJsonString(error.payload || error.message);
+      }
+    }
+
+    document.getElementById("addGarmentBtn").onclick = function () { addGarmentRow(); };
+    document.getElementById("loadOrdersBtn").onclick = function () { loadOrders(); };
+    document.getElementById("clearFiltersBtn").onclick = function () {
+      filterName.value = "";
+      filterPhone.value = "";
+      filterStatus.value = "";
+      loadOrders();
+    };
+
+    apiBaseInput.oninput = updateApiBaseText;
+    orderForm.onsubmit = createOrder;
+
+    updateApiBaseText();
+    addGarmentRow();
+    loadOrders();
+  </script>
+</body>
+</html>
